@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Global middleware
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: 'https://bahobudget.vercel.app' }));
 app.use(express.json());
 
 // MongoDB
