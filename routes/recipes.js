@@ -29,8 +29,37 @@ router.post('/analyze', authMiddleware, async (req, res) => {
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const body = { ...req.body, owner: req.user.id };
-    const newRecipe = new Recipe(body);
+    const raw = req.body || {};
+    const ingredients = Array.isArray(raw.ingredients) ? raw.ingredients : [];
+    const calculatedCost = ingredients.reduce((sum, i) => sum + (Number(i.costRWF) || 0), 0);
+
+    const totalCostRWF = Number(raw.totalCostRWF ?? raw.totalCost ?? calculatedCost) || calculatedCost;
+    const suggestedPriceRWF = Number(raw.suggestedPriceRWF ?? raw.suggestedPrice ?? Math.round(totalCostRWF * 1.35)) || Math.round(totalCostRWF * 1.35);
+    const marginPercentage = Number(
+      raw.marginPercentage ?? raw.profitMargin ?? (suggestedPriceRWF > 0 ? Math.round(((suggestedPriceRWF - totalCostRWF) / suggestedPriceRWF) * 100) : 35)
+    ) || 35;
+
+    const rawNutrition = raw.nutrition || {};
+    const nutrition = {
+      calories: Number(rawNutrition.calories ?? (calculatedCost > 3000 ? 1200 : 650)),
+      proteinGrams: Number(rawNutrition.proteinGrams ?? rawNutrition.protein ?? 35),
+      carbsGrams: Number(rawNutrition.carbsGrams ?? rawNutrition.carbs ?? 95),
+      fatGrams: Number(rawNutrition.fatGrams ?? rawNutrition.fat ?? 22),
+    };
+
+    const businessAdvice = raw.businessAdvice || raw.notes || '';
+
+    const newRecipe = new Recipe({
+      recipeName: raw.recipeName || 'Recipe',
+      owner: req.user.id,
+      ingredients,
+      totalCostRWF,
+      suggestedPriceRWF,
+      marginPercentage,
+      nutrition,
+      businessAdvice,
+    });
+
     const savedRecipe = await newRecipe.save();
     res.status(201).json({ success: true, data: savedRecipe });
   } catch (error) {
@@ -56,3 +85,4 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 export default router;
+

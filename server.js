@@ -46,9 +46,14 @@ app.use(
 );
 app.use(express.json());
 
+import seedMarketData from './utils/seedMarketData.js';
+
 // MongoDB
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(async () => {
+    console.log('Connected to MongoDB');
+    await seedMarketData();
+  })
   .catch((error) => {
     console.error('Error connecting to MongoDB:', error.message);
   });
