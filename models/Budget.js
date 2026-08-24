@@ -101,14 +101,6 @@ const BudgetSchema = new mongoose.Schema(
       enum: ['active', 'paused', 'completed'],
       default: 'active',
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   { timestamps: true }
 );

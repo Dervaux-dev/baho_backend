@@ -6,9 +6,16 @@
 
 export class EjoChatService {
   constructor() {
-    this.baseUrl = process.env.EJOCHAT_BASE_URL || 'https://api.ejolabs.com/api/v1';
-    this.apiKey = process.env.EJOCHAT_API_KEY || '';
+    this.defaultBaseUrl = 'https://api.ejolabs.com/api/v1';
     this.timeout = 30000;
+  }
+
+  get baseUrl() {
+    return process.env.EJOCHAT_BASE_URL || this.defaultBaseUrl;
+  }
+
+  get apiKey() {
+    return process.env.EJOCHAT_API_KEY || '';
   }
 
   async chat(messages, options = {}) {

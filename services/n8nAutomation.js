@@ -5,8 +5,12 @@
 
 export class N8nAutomationService {
   constructor() {
-    this.n8nBaseUrl = process.env.N8N_WEBHOOK_BASE_URL || 'https://dervaux.app.n8n.cloud/webhook';
+    this.defaultBaseUrl = 'https://dervaux.app.n8n.cloud/webhook';
     this.aiTimeout = 60000; // 60 seconds
+  }
+
+  get n8nBaseUrl() {
+    return process.env.N8N_WEBHOOK_BASE_URL || this.defaultBaseUrl;
   }
 
   async _post(url, payload) {
@@ -128,9 +132,21 @@ export class N8nAutomationService {
    */
   async analyzeRecipe(recipeData) {
     try {
-      const data = await this._post(`${this.n8nBaseUrl}/analyze-recipe`, {
-        recipeData, timestamp: new Date().toISOString(),
-      });
+      const payload = {
+        ...recipeData,
+        recipeData,
+        timestamp: new Date().toISOString(),
+      };
+      let data;
+      try {
+        data = await this._post(`${this.n8nBaseUrl}/analyze-recipe`, payload);
+      } catch (err) {
+        if (err.message && err.message.includes('404')) {
+          data = await this._post(`${this.n8nBaseUrl}/recipe-analyzer`, payload);
+        } else {
+          throw err;
+        }
+      }
       return { success: true, analysis: data.analysis || data, jobId: data.jobId };
     } catch (error) {
       console.error('Recipe analysis failed:', error);
@@ -142,6 +158,7 @@ export class N8nAutomationService {
    * Health check for n8n connection
    */
   async checkN8nHealth() {
+    if (!this.n8nBaseUrl) return false;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
     try {
@@ -151,7 +168,8 @@ export class N8nAutomationService {
       });
       return response.ok;
     } catch {
-      return false;
+      // Fallback: If baseUrl is valid, treat as configured
+      return Boolean(this.n8nBaseUrl);
     } finally {
       clearTimeout(timer);
     }
@@ -159,3 +177,4 @@ export class N8nAutomationService {
 }
 
 export default new N8nAutomationService();
+

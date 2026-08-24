@@ -1,7 +1,4 @@
-import dotenv from 'dotenv';
 import { verifyToken } from '../utils/auth.js';
-
-dotenv.config();
 
 export const authMiddleware = (req, res, next) => {
   try {

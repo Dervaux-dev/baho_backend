@@ -76,10 +76,6 @@ const SpendingSchema = new mongoose.Schema(
       default: false,
     },
     validationNotes: String,
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   { timestamps: true }
 );

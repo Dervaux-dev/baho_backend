@@ -1,8 +1,6 @@
 import express from 'express';
-import { N8nAutomationService } from '../services/n8nAutomation.js';
 
 const router = express.Router();
-const n8nService = new N8nAutomationService();
 
 /**
  * GET: Fetch nutrition products from n8n

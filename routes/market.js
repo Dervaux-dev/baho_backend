@@ -67,6 +67,29 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 /**
+ * READ: Get market data by category
+ * GET /api/market/category/:category
+ */
+router.get('/category/:category', async (req, res) => {
+  try {
+    const marketData = await MarketData.find({
+      category: req.params.category,
+    }).sort({ lastUpdated: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: marketData,
+      count: marketData.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
  * READ: Get market data for an item
  * GET /api/market/:item
  */
@@ -86,29 +109,6 @@ router.get('/:item', async (req, res) => {
     res.status(200).json({
       success: true,
       data: marketData,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
-
-/**
- * READ: Get market data by category
- * GET /api/market/category/:category
- */
-router.get('/category/:category', async (req, res) => {
-  try {
-    const marketData = await MarketData.find({
-      category: req.params.category,
-    }).sort({ lastUpdated: -1 });
-
-    res.status(200).json({
-      success: true,
-      data: marketData,
-      count: marketData.length,
     });
   } catch (error) {
     res.status(500).json({

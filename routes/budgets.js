@@ -217,10 +217,10 @@ router.post('/:budgetId/optimize', authMiddleware, async (req, res) => {
       });
     }
 
-    if (!budget.aiAutomation.n8nWebhook) {
+    if (!process.env.N8N_WEBHOOK_BASE_URL) {
       return res.status(400).json({
         success: false,
-        error: 'n8n automation not configured for this budget',
+        error: 'n8n automation is not configured (missing N8N_WEBHOOK_BASE_URL)',
       });
     }
 
